@@ -11,6 +11,7 @@ $RECYCLE.BIN/
 *.css.map
 
 bower_components
+dist
 node_modules
 jspm_packages/
 .yarn-integrity
