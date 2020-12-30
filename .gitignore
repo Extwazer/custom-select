@@ -1,0 +1,17 @@
+.idea
+.cache
+
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+
+.sass-cache/
+*.css.map
+
+bower_components
+node_modules
+jspm_packages/
+.yarn-integrity
+package-lock.json
