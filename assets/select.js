@@ -1,67 +1,87 @@
 const getTemplate = (placeholder, data = []) => {
-    const text = placeholder ?? 'Select Element';
-    const items = data.map(el => {
-        return `<li class="select__item" data-type="item" data-value = "${el.id}">${el.value}</li>`;
-    });
-    return `
+  const text = placeholder ?? "Select Element";
+  const items = data.map((el) => {
+    return `<li class="select__item" data-type="item" data-id="${el.id}">${el.value}</li>`;
+  });
+  return `
             <div class="select__input" data-type="input">
-                <span>${text}</span>
+                <span data-selected="default" data-type="value">${text}</span>
                 <span>&#8595;</span>
             </div>
             
             <div class="select__dropdown">
                 <ul class="select__list">
-                    ${items.join('')}
+                    ${items.join("")}
                  </ul>
             </div>
-`
+`;
 };
 
 export class Select {
-    constructor(selector, options) {
-        this.$el = document.querySelector(selector);
-        this.options = options;
-        this.#render(); //private method call
-        this.#setup();
+  constructor(selector, options) {
+    this.$el = document.querySelector(selector);
+    this.options = options;
+    this.#render(); //private method call
+    this.#setup();
+    this.selectedId = null;
+  }
+
+  #render() {
+    //Private class method  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_class_fields
+    const { placeholder, data } = this.options;
+    this.$el.classList.add("select");
+    this.$el.innerHTML = getTemplate(placeholder, data);
+  }
+
+  #setup() {
+    this.clickHandler = this.clickHandler.bind(this); //bind clickHandler this
+    this.$el.addEventListener("click", this.clickHandler); //add to clickHandler event click
+    this.$value = this.$el.querySelector('[data-type="value"]');
+  }
+
+  clickHandler(event) {
+    const { type } = event.target.dataset;
+    if (type === "input") {
+      this.toggle();
+    } else if (type === "item") {
+      const id = event.target.dataset.id;
+      this.select(id);
+      //console.log("id ", id);
     }
+  }
 
-    #render(){   //Private class method  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_class_fields
-        const {placeholder, data} = this.options;
-        this.$el.classList.add('select');
-        this.$el.innerHTML = getTemplate(placeholder, data);
-    }
+  get isOpen() {
+    return this.$el.classList.contains("open");
+  }
 
-    #setup(){
-        this.clickHandler = this.clickHandler.bind(this); //bind clickHandler this
-        this.$el.addEventListener('click', this.clickHandler) //add to clickHandler event click
-    }
+  get current() {
+    return this.options.data.find((el) => el.id === this.selectedId);
+  }
 
-    clickHandler(event){
-        const {type} = event.target.dataset;
-        if (type === 'input'){
-            this.toggle();
-        }
-    }
+  select(id) {
+    this.selectedId = id;
+    this.$value.textContent = this.current.value;
+    this.$value.dataset.selected = id;
+    this.$el.querySelectorAll('[data-type="item"]').forEach((element) => {
+      element.classList.remove("selected");
+    });
+    this.$el.querySelector(`[data-id="${id}"]`).classList.add("selected");
+    this.close();
+  }
 
-    get isOpen(){
-        return this.$el.classList.contains('open')
-    }
+  toggle() {
+    this.isOpen ? this.close() : this.open();
+  }
 
-    toggle(){
+  open() {
+    this.$el.classList.add("open");
+  }
 
-        this.isOpen ? this.close() : this.open();
+  close() {
+    this.$el.classList.remove("open");
+  }
 
-    }
-
-    open() {
-        this.$el.classList.add('open');
-    }
-
-    close() {
-        this.$el.classList.remove('open');
-    }
-
-    destroy(){
-        this.$el.removeEventListener('click', this.clickHandler)
-    }
+  destroy() {
+    this.$el.removeEventListener("click", this.clickHandler);
+  }
 }
